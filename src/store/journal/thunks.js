@@ -1,9 +1,9 @@
 //PARA DISPATCH DE FUNCIONES ASYNC
-import { collection, doc, setDoc } from "firebase/firestore/lite";
+import { collection, deleteDoc, doc, setDoc } from "firebase/firestore/lite";
 import { FirebaseDB } from "../../firebase/config";
 import { fileUpload } from "../../helpers/fileUpload";
 import { loadNotes } from "../../helpers/loadNotes";
-import { savingNewNote, addNewEmptyNote, setActiveNote, setNotes, setSaving, updateNote, setPhotosToActiveNote } from "./";
+import { savingNewNote, addNewEmptyNote, setActiveNote, setNotes, setSaving, updateNote, setPhotosToActiveNote, deleteNoteById } from "./";
 
 export const startNewNote = () =>{
   return async(dispatch, getState) =>{
@@ -55,5 +55,15 @@ export const startUploadingFiles = (files=[]) =>{
     }
     const photosUrls = await Promise.all(fileUploadPromises);
     dispatch(setPhotosToActiveNote(photosUrls));
+  }
+}
+
+export const startDeletingNote = () =>{
+  return async(dispatch, getState) =>{
+    const {uid} = getState().auth;
+    const {active:note} = getState().journal;
+    const docRef = doc(FirebaseDB, `${uid}/journal/notes/${note.id}`);
+    await deleteDoc(docRef);
+    dispatch(deleteNoteById(note.id));
   }
 }
